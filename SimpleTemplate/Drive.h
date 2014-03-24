@@ -25,20 +25,25 @@ public:
 	void setLeftMotors(double velocity);
 	void setRightMotors(double velocity);
 	
-	DoubleSolenoid *shifter;
+	double getRPM();
 	
 private:
+	OperatorInterface *oi;
+	
 	Talon *frontLeftMotor;
 	Talon *rearLeftMotor;
 	Talon *frontRightMotor;
 	Talon *rearRightMotor;
-	
-	OperatorInterface *oi;
-	
+	DoubleSolenoid *shifter;	
 	double linearVelocity; 
 	double turnSpeed; 
-	
 	double leftCmd;
 	double rightCmd;
+	
+	Encoder *leftDriveEncoder;
+	Encoder *rightDriveEncoder;
+	double rpm;
+	bool init;
+	Timer *timer;
 };
 #endif

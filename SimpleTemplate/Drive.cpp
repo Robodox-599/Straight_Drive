@@ -14,6 +14,13 @@ Drive::Drive(OperatorInterface *opInt)
 	rearLeftMotor = new Talon(1, DRIVE_REAR_LEFT_MOTOR_CHANNEL);   
 	frontRightMotor = new Talon(1, DRIVE_FRONT_RIGHT_MOTOR_CHANNEL); 
 	rearRightMotor = new Talon(1, DRIVE_REAR_RIGHT_MOTOR_CHANNEL);
+	
+	leftDriveEncoder = new Encoder(LEFT_DRIVE_ENCODER_CHANNEL_A, LEFT_DRIVE_ENCODER_CHANNEL_B);
+	rightDriveEncoder = new Encoder(RIGHT_DRIVE_ENCODER_CHANNEL_A, RIGHT_DRIVE_ENCODER_CHANNEL_B);
+	rpm = 0;
+	init = true;
+	timer = new Timer();
+	timer->Start();
 }
 
 Drive::~Drive()
@@ -23,12 +30,18 @@ Drive::~Drive()
 	delete rearLeftMotor;
 	delete frontRightMotor;
 	delete rearRightMotor;
+	delete leftDriveEncoder;
+	delete rightDriveEncoder;
+	delete timer;
 	
 	shifter = NULL;
 	frontLeftMotor = NULL;
 	rearLeftMotor = NULL;
 	frontRightMotor = NULL;
 	rearRightMotor = NULL;
+	leftDriveEncoder = NULL;
+	rightDriveEncoder = NULL;
+	timer = NULL;
 }
 
 bool Drive::shift(UINT8 highButton, UINT8 lowButton)
@@ -117,4 +130,32 @@ void Drive::drive()
 	setLeftMotors(leftCmd);
 	setRightMotors(rightCmd);
 }
+
+double Drive::getRPM()
+{
+	double initTime = 0;
+	double deltaTime = 0;
+	double initTicks = 0;
+	double deltaTicks = 0;
+	double ticksPerMinute = 0;
+	
+	if(init)
+	{
+		initTime = timer->Get();
+		initTicks = leftDriveEncoder->Get();
+		init = false;
+	}
+	
+	deltaTime = timer->Get() - initTime;
+	deltaTicks = leftDriveEncoder->Get() - initTicks;
+	
+	if(deltaTime == TIME_COMPARISON)
+	{
+		ticksPerMinute = deltaTicks * TIME_COMPARISON * MINUTE_CONVERSION;
+		rpm = ticksPerMinute / TICKS_PER_ROTATION;
+		init = true;
+	}
+	return rpm;
+}
+
 
